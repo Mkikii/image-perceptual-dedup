@@ -114,41 +114,48 @@ try:
 
     print(f"Found {len(image_files)} image files.")
 
-    unique_hashes = []
-    unique_filepaths = []
-    duplicates = []
+    def find_duplicates(image_files):
+        from collections import defaultdict
 
-    for img_path in image_files:
-        try:
-            # Check image file size
-            if os.path.getsize(img_path) > args.max_image_size:
-                print(f"Skipping {img_path}: File too large")
+        # Group images by their hash to reduce comparisons
+        hash_dict = defaultdict(list)
+        unique_filepaths = []
+        duplicates = []
+
+        for img_path in image_files:
+            try:
+                if os.path.getsize(img_path) > args.max_image_size:
+                    print(f"Skipping {img_path}: File too large")
+                    continue
+
+                with Image.open(img_path) as img:
+                    img.verify()
+                    img.load()
+                    img_hash = tuple(average_hash(img))  # Convert to tuple for hashing
+
+                    # Check for similar hashes
+                    found_similar = False
+                    for existing_hash in hash_dict:
+                        if hamming_distance(img_hash, existing_hash) <= HASH_DIFF_THRESHOLD:
+                            duplicates.append(img_path)
+                            found_similar = True
+                            break
+
+                    if not found_similar:
+                        hash_dict[img_hash].append(img_path)
+                        unique_filepaths.append(img_path)
+
+            except (IOError, SyntaxError, ValueError) as e:
+                print(f"Error processing {img_path}: Invalid or corrupted image - {e}")
+                continue
+            except Exception as e:
+                print(f"Error processing {img_path}: {e}")
                 continue
 
-            with Image.open(img_path) as img:
-                # Validate image file
-                img.verify()
-                img.load()  # Required to catch potential truncated images
-                img_hash = average_hash(img)
+        return unique_filepaths, duplicates
 
-        except (IOError, SyntaxError, ValueError) as e:
-            print(f"Error processing {img_path}: Invalid or corrupted image - {e}")
-            continue
-        except Exception as e:
-            print(f"Error processing {img_path}: {e}")
-            continue
-
-        # Check against all previously stored unique hashes
-        is_dup = False
-        for uhash in unique_hashes:
-            if hamming_distance(img_hash, uhash) <= HASH_DIFF_THRESHOLD:
-                is_dup = True
-                break
-        if is_dup:
-            duplicates.append(img_path)
-        else:
-            unique_hashes.append(img_hash)
-            unique_filepaths.append(img_path)
+    # Replace the existing image processing loop with:
+    unique_filepaths, duplicates = find_duplicates(image_files)
 
     print(
         f"Identified {len(unique_filepaths)} unique images and {len(duplicates)} duplicates.")

@@ -62,6 +62,11 @@ The script will:
 - Uses PIL/Pillow for image processing
 - Temporary files are automatically cleaned up
 - Memory efficient - processes images one at a time
+- Performance optimizations:
+  - Groups similar images by hash to reduce comparisons
+  - Uses tuple-based hash dictionary for efficient lookups
+  - Encapsulated duplicate detection logic for better maintainability
+  - Optimized for handling large datasets with minimal memory footprint
 
 ## Configuration
 
