@@ -1,6 +1,6 @@
 # Image Perceptual Deduplication
 
-A Python tool that removes duplicate images from ZIP archives using perceptual hashing. This tool can detect and remove similar images even if they've been resized, compressed, or slightly modified.
+A high-performance Python tool that removes duplicate images from ZIP archives using perceptual hashing. This tool efficiently detects and removes similar images even if they've been resized, compressed, or slightly modified, while maintaining directory structure and optimizing memory usage.
 
 ## Features
 - Identifies similar images using average hash algorithm
