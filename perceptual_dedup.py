@@ -40,7 +40,6 @@ def hamming_distance(hash1, hash2):
     """
     return sum(el1 != el2 for el1, el2 in zip(hash1, hash2))
 
-
 # Define list of valid image extensions
 VALID_EXTENSIONS = {'.png', '.jpg', '.jpeg', '.bmp', '.gif', '.tiff'}
 
